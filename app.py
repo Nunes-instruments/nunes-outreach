@@ -7,8 +7,14 @@ app = Flask(__name__)
 
 PAUSE_FILE = "/tmp/PAUSE" if os.environ.get("VERCEL") else os.path.join(os.path.dirname(__file__), "PAUSE")
 
-@app.route("/")
-def home():
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def home(path=""):
+    if path in ("pause", "api/pause"):
+        return pause()
+    if path in ("resume", "api/resume"):
+        return resume()
+
     with conn() as c:
         rows = c.execute("SELECT * FROM contacts ORDER BY product, rnk IS NULL, rnk, id DESC").fetchall()
     
